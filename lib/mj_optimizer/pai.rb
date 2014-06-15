@@ -38,7 +38,7 @@ module MJOptimizer
     def initialize(tehai_str)
       if validate(tehai_str)
         self.type     = tehai_str[0,1]
-        self.number   = tehai_str[1,1].to_i
+        self.number   = tehai_str[1,1]
         if tehai_str[2,1] == Pai::PAI_DIRECT_TOP || tehai_str[2,1] == Pai::PAI_DIRECT_BUTTOM then
           self.naki   = false
         elsif tehai_str[2,1] == Pai::PAI_DIRECT_LEFT || tehai_str[2,1] == Pai::PAI_DIRECT_RIGHT then
@@ -51,62 +51,30 @@ module MJOptimizer
       end
     end
 
-    def name
-      type + number
-    end
-
-    def name_with_direction
-      self.name + self.direction
-    end
-
-    def same?(hai)
-      if self.name == hai.name
-        true
+    # self.typeの次の牌のPayTypeを返す
+    # @param times いくつ先のPayか
+    # @return PaiType
+    def next_pai_type(times = 1)
+      if self.type =~ /[msp]/ && self.number < 10 - times
+        PaiType.get("#{self.type}#{self.number + times}")
       else
-        false
+        nil
       end
     end
 
-    def same_with_direction?(hai)
-      if same?(hai) && self.direction == hai.direction
-        true
+    # self.typeの前の牌のPayTypeを返す
+    # @param times いくつ前のPayか
+    # @return PaiType
+    def prev_pai_type(times = 1)
+      if type =~ /[msp]/ && number > times
+        PaiType.get("#{self.type}#{self.number + times}")
       else
-        false
+        nil
       end
     end
 
-    def next
-      if type =~ /[msp]/ && number < 9
-        type + (number + 1).to_s
-      else
-        false
-      end
-    end
-
-    def next_with_direction
-      if self.next
-        self.next + direction
-      else
-        false
-      end
-    end
-
-    def prev
-      if type =~ /[msp]/ && number > 1
-        type + (number - 1).to_s
-      else
-        false
-      end
-    end
-
-    def prev_with_direction
-      if self.prev
-        self.prev + direction
-      else
-        false
-      end
-    end
-
+    # ==============================================
+    # 以下はmjparserで実装されていたメソッド
     # ==============================================
 
     def ==(pai)
@@ -204,6 +172,10 @@ module MJOptimizer
       return true if sangenpai?
       kyoku.jikaze?(self) or kyoku.bakaze?(self)
     end
+
+    # ==============================================
+    # ここまで
+    # ==============================================
 
     private
 

@@ -2,12 +2,15 @@
 require 'mj_optimizer'
 include MJOptimizer
 
-describe "TehaiParser" do
+describe "SutehaiSelector" do
+  before :each do
+    @tehai_parser = SutehaiSelector.new
+  end
   describe "#initialize" do
-    # TehaiParserクラスのインスタンスが生成される
-    it "creates the new TehaiParser instance" do
-      tp = TehaiParser.new("m1tm2tm3ts4ts5ts6tp7tp8tp9tj1tj7t")
-      expect(tp).to be_an_instance_of(TehaiParser)
+    # SutehaiSelectorクラスのインスタンスが生成される
+    it "creates the new SutehaiSelector instance" do
+      # @tehai_parser.select("m1tm2tm3ts4ts5ts6tp7tp8tp9tj1tj7t")
+      expect(@tehai_parser).to be_an_instance_of(SutehaiSelector)
     end
   end
 
@@ -22,9 +25,9 @@ describe "TehaiParser" do
     context "when not found jihai" do
       # 面子を1つも返さない
       it "does not return mentsu" do
-        tp = TehaiParser.new("m1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1t")
-        pai_list = tp.pai_list
-        expect(tp.send(:normal_jihai_parse, pai_list).mentsu.size).to eq 0
+        # tp = SutehaiSelector.new("m1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1tm1t")
+        # pai_list = tp.pai_list
+        # expect(tp.send(:normal_jihai_parse, pai_list).mentsu.size).to eq 0
       end
     end
 
@@ -41,6 +44,10 @@ describe "TehaiParser" do
 
     # 字牌が同一の2枚が3組ある場合
 
+
+  end
+
+  describe "#get_single_pai_list" do
 
   end
 end

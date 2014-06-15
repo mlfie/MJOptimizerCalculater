@@ -2,7 +2,7 @@ module MJOptimizer
   module TehaiParseChitoitsu
 
     # 手牌を元に、七対子へのシャンテン数を求める
-    def get_tehai_when_chitoitsu(tehai)
+    def get_tehai_chitoitsu(tehai)
       # 残り枚数が1枚以下
       if tehai.rest_pai_list.count < 2
         # 残り枚数が1枚の場合、最後の1枚をSingleListにセット
@@ -14,6 +14,7 @@ module MJOptimizer
 
         # あがり形を指定
         tehai.agari_type = Tehai::AGARU_TYPE_CHITOITSU
+        tehai.is_parsed = true
         return tehai
       end
 

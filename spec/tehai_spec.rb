@@ -55,7 +55,60 @@ describe "Tehai" do
     end
 
     # agari_typeがAGARU_TYPE_NORMALの場合
-    context "when agari_type is AGARU_TYPE_NORMAL"
+    context "when agari_type is AGARU_TYPE_NORMAL" do
+
+      before :each do
+        @tehai.agari_type = Tehai::AGARU_TYPE_NORMAL
+      end
+
+      # 面子*4、対子*1 あがり
+      it "has 4 mentsu and 1 janto" do
+        @tehai.toitsu_list = [Toitsu.new([Pai.new("m1t"),Pai.new("m1t")])]
+        @tehai.mentsu_list = [
+          Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU),
+          Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU),
+          Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU),
+          Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU)
+        ]
+        expect(@tehai.shanten_count).to eq 0
+        expect(@tehai.agari?).to be true
+      end
+      # 面子*3、対子*2 1シャンテン
+      it "has 3 mentsu and 1 toitsu 1 janto" do
+        @tehai.toitsu_list = [
+          Toitsu.new([Pai.new("m1t"),Pai.new("m1t")]),
+          Toitsu.new([Pai.new("m1t"),Pai.new("m1t")])
+        ]
+        @tehai.mentsu_list = [
+          Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU),
+          Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU),
+          Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU)
+        ]
+        expect(@tehai.shanten_count).to eq 1
+        expect(@tehai.agari?).to be false
+      end
+
+      # 面子*2、対子*3 2シャンテン
+      it "has 2 mentsu and 2 toitsu 1 janto" do
+        @tehai.toitsu_list = [
+            Toitsu.new([Pai.new("m1t"),Pai.new("m1t")]),
+            Toitsu.new([Pai.new("m1t"),Pai.new("m1t")]),
+            Toitsu.new([Pai.new("m1t"),Pai.new("m1t")])
+        ]
+        @tehai.mentsu_list = [
+            Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU),
+            Mentsu.new([Pai.new("m1t"),Pai.new("m1t"),Pai.new("m1t")],Mentsu::MENTSU_TYPE_SHUNTSU)
+        ]
+        expect(@tehai.shanten_count).to eq 2
+        expect(@tehai.agari?).to be false
+      end
+
+      # 面子*1、対子*5 3シャンテン
+      it "1 mentsu and 4 toitsu 1 janto"
+
+      # 面子*0、ターツ*6 5シャンテン
+
+    end
 
     # agari_typeがAGARU_TYPE_CHITOITSUの場合
     context "when agari_type is AGARU_TYPE_CHITOITSU" do
@@ -91,15 +144,48 @@ describe "Tehai" do
       end
 
       # 全部ヤオチュウ牌（ダブりなし、雀頭あり）
-      it "has 13 yaochu and 1 janto"
+      it "has 13 yaochu and 1 janto" do
+        @tehai.toitsu_list = [Toitsu.new([Pai.new("m1t"),Pai.new("m1t")])]
+        @tehai.single_list = [
+          Pai.new("m9t"),
+          Pai.new("s1t"),
+          Pai.new("s9t"),
+          Pai.new("p1t"),
+          Pai.new("p9t"),
+          Pai.new("j1t"),
+          Pai.new("j2t"),
+          Pai.new("j3t"),
+          Pai.new("j4t"),
+          Pai.new("j5t"),
+          Pai.new("j6t"),
+          Pai.new("j7t")]
+        expect(@tehai.shanten_count).to eq 0
+        expect(@tehai.agari?).to be true
+      end
 
       # 全部ヤオチュウ牌（ダブりあり）
-      it "has 13 yaochu of duplicated"
+      it "has 13 yaochu of duplicated" do
+        @tehai.toitsu_list = [
+          Toitsu.new([Pai.new("m1t"),Pai.new("m1t")]),
+          Toitsu.new([Pai.new("m9t"),Pai.new("m9t")])
+        ]
+        @tehai.single_list = [
+          Pai.new("s9t"),
+          Pai.new("p1t"),
+          Pai.new("p9t"),
+          Pai.new("j1t"),
+          Pai.new("j2t"),
+          Pai.new("j3t"),
+          Pai.new("j4t"),
+          Pai.new("j5t"),
+          Pai.new("j6t"),
+          Pai.new("j7t")]
+        expect(@tehai.shanten_count).to eq 1
+        expect(@tehai.agari?).to be false
+      end
 
       # 全部中張牌
       it "has 13 chuchan pai" do
-        fixtures :1
-
         @pai = Pai.new("m5t")
         @tehai.single_list = [@pai] * 14
         expect(@tehai.shanten_count).to eq 14
