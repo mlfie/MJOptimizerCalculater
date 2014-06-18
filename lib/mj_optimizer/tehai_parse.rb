@@ -6,7 +6,7 @@ module MJOptimizer
 
   # 手配を解析して面子、対子、などに分解するクラス
   # 本名：SutehaiSelector
-  class SutehaiSelector
+  class TehaiParse
     include TehaiParseChitoitsu
     include TehaiParseKokushi
     include TehaiParseNormal
@@ -16,7 +16,7 @@ module MJOptimizer
     end
 
     # 本番は、Paiのリストが送られてくる
-    def select(tehai_list)
+    def get_select(tehai_list)
       # 3文字ずつ区切ってPaiクラスを作り、Tehaiのpai_listに格納
       tehai_list.scan(/.{3}/).each do |pai|
         @tehai << Pai.new(pai)
@@ -29,8 +29,6 @@ module MJOptimizer
         nil
       end
     end
-
-    private
 
     #################################################################################
     # 解析処理メイン
@@ -65,7 +63,7 @@ module MJOptimizer
     # 手牌リストから指定したタイプの牌だけを選択する
     def get_selected_by_type(tehai_list, pai_type)
       case pai_type
-        when Type::Menzu
+        when Type::Manzu
           get_manzu(tehai_list)
         when Type::Pinzu
           get_pinzu(tehai_list)

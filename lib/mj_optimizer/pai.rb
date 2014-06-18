@@ -55,8 +55,8 @@ module MJOptimizer
     # @param times いくつ先のPayか
     # @return PaiType
     def next_pai_type(times = 1)
-      if self.type =~ /[msp]/ && self.number < 10 - times
-        PaiType.get("#{self.type}#{self.number + times}")
+      if self.type =~ /[msp]/ && self.number.to_i < 10 - times
+        PaiType.get("#{self.type}#{self.number.to_i + times}")
       else
         nil
       end
@@ -66,8 +66,8 @@ module MJOptimizer
     # @param times いくつ前のPayか
     # @return PaiType
     def prev_pai_type(times = 1)
-      if type =~ /[msp]/ && number > times
-        PaiType.get("#{self.type}#{self.number + times}")
+      if type =~ /[msp]/ && number.to_i > times
+        PaiType.get("#{self.type}#{self.number.to_i - times}")
       else
         nil
       end

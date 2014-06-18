@@ -48,12 +48,12 @@ module MJOptimizer
       jihai_list.each do |target_pai|
         if jihai_list.select{|pai| pai == target_pai}.count == 1
           tehai.single_list << target_pai
-          tehai.rest_pai_list -= target_pai
+          tehai.rest_pai_list -= [target_pai]
         end
       end
 
       # 数牌で単独牌を抽出
-      [Pai::Menzu, Pai::Pinzu, Pai::Souzu].each do |pai_type|
+      [Type::Manzu, Type::Pinzu, Type::Souzu].each do |pai_type|
         # 重複しない かつ 2つ以内の牌がない
         manzu_list = get_selected_by_type(tehai.rest_pai_list, pai_type)
         manzu_list.each do |target_pai|
@@ -66,7 +66,7 @@ module MJOptimizer
           end
           if selected_list.count == 1
             tehai.single_list << target_pai
-            tehai.rest_pai_list -= target_pai
+            tehai.rest_pai_list -= [target_pai]
           end
         end
       end
@@ -94,10 +94,10 @@ module MJOptimizer
           # TODO: 槓子かどうかの判定
           # 今はとりあえず面子+1枚と判定する
           tehai.single_list << selected_pai_list.pop
-          tehai.mentsu_list << Mentsu.new(selected_pai_list)
+          tehai.mentsu_list << Mentsu.new(selected_pai_list, "k")
         # Step.1-2 3枚ある場合
         when 3
-          tehai.mentsu_list << Mentsu.new(selected_pai_list)
+          tehai.mentsu_list << Mentsu.new(selected_pai_list, "k")
         # Step.1-3 2枚ある場合
         when 2
           tehai.toitsu_list << Toitsu.new(selected_pai_list)
@@ -142,6 +142,8 @@ module MJOptimizer
       tehai
     end
 
+    # ここから各面子・ターツ・対子を求める処理
+
     def parse_mentsu(tehai)
       tehai.rest_pai_list.each do |target_pai|
         next if target_pai.nil?
@@ -153,59 +155,70 @@ module MJOptimizer
             tehai.single_list << selected_pai_list.pop
             tehai.mentsu_list << Mentsu.new(selected_pai_list, "t")
             tehai.rest_pai_list -= selected_pai_list
+            return parse_mentsu(tehai)
           when 3
             tehai.mentsu_list << Mentsu.new(selected_pai_list, "t")
             tehai.rest_pai_list -= selected_pai_list
+            return parse_mentsu(tehai)
         end
       end
+      tehai
     end
 
     def parse_syuntsu(tehai)
       tehai.rest_pai_list.each do |target_pai|
         next if target_pai.nil?
-        next1 = tehai.rest_pai_list.find{|pai| pai == target_pai.next(1)}
-        next2 = tehai.rest_pai_list.find{|pai| pai == target_pai.next(2)}
+        next1 = tehai.rest_pai_list.find{|pai| pai.pai_type == target_pai.next_pai_type(1)}
+        next2 = tehai.rest_pai_list.find{|pai| pai.pai_type == target_pai.next_pai_type(2)}
         if next1 && next2
           tehai.mentsu_list << Mentsu.new([target_pai, next1, next2], "s")
           tehai.rest_pai_list -= [target_pai, next1, next2]
+          return parse_syuntsu(tehai)
         end
       end
+      tehai
     end
 
     def parse_ryanmenchan(tehai)
       tehai.rest_pai_list.each do |target_pai|
         next if target_pai.nil?
-        next if target_pai.number == 1 || target_pai.number == 8
-        next1 = tehai.rest_pai_list.find{|pai| pai == target_pai.next(1)}
+        next if target_pai.number.to_i == 1 || target_pai.number.to_i >= 8
+        next1 = tehai.rest_pai_list.find{|pai| pai.pai_type == target_pai.next_pai_type(1)}
         if next1
           tehai.tatsu_list << Tatsu.new([target_pai, next1], "r")
           tehai.rest_pai_list -= [target_pai, next1]
+          return parse_ryanmenchan(tehai)
         end
       end
+      tehai
     end
 
     def parse_kanchan(tehai)
       tehai.rest_pai_list.each do |target_pai|
         next if target_pai.nil?
-        next if target_pai.number > 7
-        next2 = tehai.rest_pai_list.find{|pai| pai == target_pai.next(2)}
+        next if target_pai.number.to_i > 7
+        next2 = tehai.rest_pai_list.find{|pai| pai.pai_type == target_pai.next_pai_type(2)}
         if next2
-          tehai.tatsu_list << Tatus.new([target_pai, next1, next2], "k")
-          tehai.rest_pai_list -= [target_pai, next1, next2]
+          tehai.tatsu_list << Tatsu.new([target_pai, next2], "k")
+          tehai.rest_pai_list -= [target_pai, next2]
+          return parse_kanchan(tehai)
         end
       end
+      tehai
     end
 
     def parse_penchan(tehai)
       tehai.rest_pai_list.each do |target_pai|
         next if target_pai.nil?
-        next unless target_pai.number == 1 || target_pai.number == 8
-        next1 = tehai.rest_pai_list.find{|pai| pai == target_pai.next(1)}
+        next unless target_pai.number.to_i == 1 || target_pai.number.to_i == 8
+        next1 = tehai.rest_pai_list.find{|pai| pai.pai_type == target_pai.next_pai_type(1)}
         if next1
           tehai.tatsu_list << Tatsu.new([target_pai, next1], "p")
           tehai.rest_pai_list -= [target_pai, next1]
+          return parse_penchan(tehai)
         end
       end
+      tehai
     end
 
     def parse_toitsu(tehai)
@@ -216,8 +229,10 @@ module MJOptimizer
           when 2
             tehai.toitsu_list << Toitsu.new(selected_pai_list)
             tehai.rest_pai_list -= selected_pai_list
+            return parse_toitsu(tehai)
         end
       end
+      tehai
     end
   end
 end
